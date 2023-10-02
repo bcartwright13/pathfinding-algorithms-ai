@@ -65,6 +65,11 @@ def BFS(start,goal,cost,arr):
     #each one of these is going to have a statement to check if that value has already been seen and then we need to compare it with the cost  
     #while timer is less than 3 minutes keep searching 
     while(True):
+        if(curr.get[0] == goal[0] and curr.get[1] == goal[1]):
+            elapsed_time = time.time() - start_time
+            break
+            print(elapsed_time)
+        return path 
         print(f' this is curr {curr.get()}')
         up,down,left,right = generate_successor(curr.get())
         print(up)
