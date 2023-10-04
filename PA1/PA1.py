@@ -1,53 +1,55 @@
 import numpy as np 
 import time 
 import queue
+
+class Node:
+  def __init__(self, name, age):
+    self.parent = None
+    self.cost = None  
+
 #Breadth First Search 
 '''
 We first need to read the file so we could get the starting dimensions, starting location, and our end goal for our search algorithm
 '''
+def read(path):
+    f = open(path,"r")
+    dims = f.readline().split()
+    start = f.readline().split()
+    goal = f.readline().split()
+    f.close()
+    arr = np.zeros((int(dims[0]), int(dims[1])),dtype=np.int8)
+    start = (int(start[0]),int(start[1]))
+    goal = (int(goal[0]),int(goal[1]))
+    arr[int(start[0]),int(start[1])] = 1
+    arr[int(goal[0]),int(goal[1])] = -1
+    print(arr)
 
+    with open(path, 'r') as file:
+        # Read the file line by line
+        lines = file.readlines()
 
-f = open("Test1.txt","r")
-dims = f.readline().split()
-start = f.readline().split()
-goal = f.readline().split()
-f.close()
-arr = np.zeros((int(dims[0]), int(dims[1])),dtype=np.int8)
-start = (int(start[0]),int(start[1]))
-goal = (int(goal[0]),int(goal[1]))
-arr[int(start[0]),int(start[1])] = 1
-arr[int(goal[0]),int(goal[1])] = -1
-#print(start)
-#print(goal)
-print(arr)
+    # Skip the first 3 lines
+    lines_to_skip = 3
+    remaining_lines = lines[lines_to_skip:]
 
-with open('Test1.txt', 'r') as file:
-    # Read the file line by line
-    lines = file.readlines()
+    cost = []
+    for line in remaining_lines:
+        numbers = line.strip().split()
+        cost.append(numbers)
 
-# Skip the first 3 lines
-lines_to_skip = 3
-remaining_lines = lines[lines_to_skip:]
-
-cost = []
-for line in remaining_lines:
-    numbers = line.strip().split()
-    cost.append(numbers)
-#print(cost[0][0])
+    return arr,cost,start,goal
 '''
 Now that we have all of our starting info we need to created the basics for bfs. We do not need to create a arr for visited since 
 we have the array that represents if it has been visited. We need to created our queue 
 '''
 def generate_successor(curr):
-    print("testin1")
     row = curr[0]
     col = curr[1]
-    print("testin2")
+    #check here if it index is in bounds before creating the variable 
     up   = (row - 1, col)
     down = (row + 1, col)
     left = (row, col - 1)
     right= (row, col + 1)
-    print("testin3")
     return up, down, left, right
 
 
@@ -65,12 +67,14 @@ def BFS(start,goal,cost,arr):
     #each one of these is going to have a statement to check if that value has already been seen and then we need to compare it with the cost  
     #while timer is less than 3 minutes keep searching 
     while(True):
-        if(curr.get[0] == goal[0] and curr.get[1] == goal[1]):
+        elapsed_time = time.time() - start_time
+        if elapsed_time >= 10:
+            break  # Exit the loop if 10 seconds have passed
+        if(start == goal):
             elapsed_time = time.time() - start_time
-            break
             print(elapsed_time)
-        return path 
-        print(f' this is curr {curr.get()}')
+            return path 
+        #print(f' this is curr {curr.get()}')
         up,down,left,right = generate_successor(curr.get())
         print(up)
         #up
@@ -89,15 +93,15 @@ def BFS(start,goal,cost,arr):
         if(0 <= right[0] < len(arr) and 0 <= right[1] < len(arr[0]) and arr[right[0]][right[1]] == 0):
             print('testing right')
             curr.put(right)
-        #Statement to check that my time is still valid 
-        elapsed_time = time.time() - start_time
-        if elapsed_time >= 10:
-            break  # Exit the loop if 10 seconds have passed
-    while not curr.empty():
-        print(curr.get())
-
-
         
+        print(arr)
+        #Statement to check that my time is still valid 
+        while not curr.empty():
+            print(curr.get())
+
+
+path = 'Test1.txt'
+arr,cost,start,goal = read(path)
 BFS(start,goal,cost,arr)
 
 
