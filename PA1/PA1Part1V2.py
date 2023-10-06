@@ -42,6 +42,42 @@ def bfs(dimensions, start, goal, map_grid):
 
     return None, nodes_expanded, max_nodes
 
+def dfs(dimensions, start, goal, map_grid):
+    startTime = time.time()
+    rows, cols = dimensions
+    visited = set()
+    stack = deque()
+    stack.append(start)
+    visited.add(start)
+    nodes = {start: Node(start, map_grid[start[0]][start[1]])}
+    max_nodes = len(stack)
+    nodes_expanded = 0
+
+    while stack:
+        elapsedTime = time.time() - startTime
+        if elapsedTime > 180:  # 180 seconds = 3 minutes
+            print("3-minute time cutoff reached!")
+            return None, nodes_expanded, max_nodes
+        
+        # update max nodes
+        max_nodes = max(max_nodes, len(stack))
+
+        # pop a node from stack
+        r, c = stack.pop()
+        current_node = nodes[(r,c)]
+        nodes_expanded += 1
+
+        if (r,c) == goal:
+            return current_node, nodes_expanded, max_nodes
+        directions = [(r - 1, c), (r + 1, c), (r, c + 1), (r, c - 1)]
+        for dr, dc in directions:
+            if 0 <= dr < rows and 0 <= dc < cols and map_grid[dr][dc] != 0 and (dr, dc) not in visited:
+                visited.add((dr, dc))
+                stack.append((dr, dc))
+                nodes[(dr, dc)] = Node((dr, dc), map_grid[dr][dc], current_node)
+
+    return None, nodes_expanded, max_nodes        
+
 def file_reader():
     try:
         file_name = input("Enter the file name you wish to test: ")
@@ -84,6 +120,30 @@ def main():
             print("Path sequence:", path)
         else:
         
+            print("No path found.")
+            print("Number of nodes expanded:", nodes_expanded)
+            print("Max nodes stored in memory:", max_nodes)
+            print("Total time: {:.9f} seconds".format(end_time - start_time))
+    if searchChoice == "ids":
+        start_time = time.time()
+        end_node, nodes_expanded, max_nodes = dfs(dimensions, start, goal, map_grid)
+        end_time = time.time()
+
+        if end_node:
+            total_cost = 0
+            path =[]
+            while end_node:
+                path.append(end_node.coord)
+                total_cost += end_node.cost
+                end_node = end_node.parent
+            path = path[::-1]
+            print("Path Found!")
+            print("Total Cost:", total_cost)
+            print("Number of nodes expanded:", nodes_expanded)
+            print("Max nodes stored in memory:", max_nodes)
+            print("Total time: {:.9f} seconds".format(end_time - start_time))
+            print("Path sequence:", path)
+        else:
             print("No path found.")
             print("Number of nodes expanded:", nodes_expanded)
             print("Max nodes stored in memory:", max_nodes)
