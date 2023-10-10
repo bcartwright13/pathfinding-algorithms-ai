@@ -4,10 +4,11 @@ import time
 
 
 class Node:
-    def __init__(self, coord, cost, parent=None):
+    def __init__(self, coord, cost,parent=None, depth=0):
         self.parent = parent
         self.coord = coord
         self.cost = cost
+        self.depth = depth
 
 def bfs(dimensions, start, goal, map_grid):
     startTime = time.time()
@@ -42,7 +43,7 @@ def bfs(dimensions, start, goal, map_grid):
 
     return None, nodes_expanded, max_nodes
 
-def dfs(dimensions, start, goal, map_grid):
+def dfs(dimensions, start, goal, map_grid,depth):
     startTime = time.time()
     rows, cols = dimensions
     visited = set()
@@ -69,12 +70,18 @@ def dfs(dimensions, start, goal, map_grid):
 
         if (r,c) == goal:
             return current_node, nodes_expanded, max_nodes
+        
+        if current_node.depth == depth:
+            continue
+
         directions = [(r - 1, c), (r + 1, c), (r, c + 1), (r, c - 1)]
         for dr, dc in directions:
             if 0 <= dr < rows and 0 <= dc < cols and map_grid[dr][dc] != 0 and (dr, dc) not in visited:
                 visited.add((dr, dc))
                 stack.append((dr, dc))
                 nodes[(dr, dc)] = Node((dr, dc), map_grid[dr][dc], current_node)
+                new_depth = nodes[(dr, dc)].depth + 1
+                nodes[(dr, dc)].depth = new_depth
 
     return None, nodes_expanded, max_nodes        
 
@@ -125,8 +132,22 @@ def main():
             print("Max nodes stored in memory:", max_nodes)
             print("Total time: {:.9f} seconds".format(end_time - start_time))
     if searchChoice == "ids":
+        depth = 0
         start_time = time.time()
-        end_node, nodes_expanded, max_nodes = dfs(dimensions, start, goal, map_grid)
+        while True:
+            elapsed_time = time.time() - start_time
+            if elapsed_time > 180:
+                print("3-minute cutoff reached")
+                break
+
+            end_node, nodes_expanded, max_nodes = dfs(dimensions, start, goal, map_grid,depth)
+
+            if end_node == None:
+                depth += 1
+                end_node, nodes_expanded, max_nodes = dfs(dimensions, start, goal, map_grid, depth)
+            else:
+                break
+
         end_time = time.time()
 
         if end_node:
