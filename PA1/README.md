@@ -7,7 +7,7 @@ Contributed to loop structures in node traversal.
 -Collaborated in debugging sessions.
 -Coded majority of A* algorithm
 
-Dario Vasquez:
+Dario Vazquez:
 
 -Integrated file reading functionalities.
 -Chose appropriate data structures (deque, sets).
