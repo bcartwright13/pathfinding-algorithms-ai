@@ -179,6 +179,7 @@ def searchDecision(searchChoice, dimensions, start, goal, map_grid):
         end_node, nodes_expanded, max_nodes = bfs(dimensions, start, goal, map_grid)
     elif searchChoice == "ids":
         depth = 0
+        count = 0
         start_time = time.time()
         while True:
             elapsed_time = time.time() - start_time
@@ -189,6 +190,9 @@ def searchDecision(searchChoice, dimensions, start, goal, map_grid):
             end_node, nodes_expanded, max_nodes = dfs(dimensions, start, goal, map_grid,depth)
 
             if end_node == None:
+                count += 1
+                if count > 100:
+                    break
                 depth += 1
                 end_node, nodes_expanded, max_nodes = dfs(dimensions, start, goal, map_grid, depth)
             else:
