@@ -1,14 +1,22 @@
 from collections import deque
+import heapq
 import time
 
 
 
 class Node:
-    def __init__(self, coord, cost,parent=None, depth=0):
+    def __init__(self, coord, cost = 0,parent=None, depth=0):
+        #parent node storage
         self.parent = parent
         self.coord = coord
+        #cost stores the distance to travel
         self.cost = cost
         self.depth = depth
+        #heuristic distance
+        self.heuristic = 0
+        #heuristic + cost
+        self.total_cost = 0
+        
 
 def results(end_node, nodes_expanded, max_nodes, elapsed_time):
     if end_node:
@@ -32,9 +40,48 @@ def results(end_node, nodes_expanded, max_nodes, elapsed_time):
         print("Max nodes stored in memory:", max_nodes)
         print("Total time: {:.9f} seconds".format(elapsed_time))
 
+def manhanttan_distance(current_node_coord, goal_node_coord):
+    return abs(current_node_coord[0] - goal_node_coord[0]) + abs(current_node_coord[1] - goal_node_coord[1])
 
-def aStar():
-    return
+def a_star(dimensions, start, goal, map_grid):
+    rows, cols = dimensions
+    start_node = Node(start, 0, None, None)
+    start_node.heuristic = manhanttan_distance(start,goal)
+    start_node.total_cost = start_node.heuristic
+    priority_queue = [(start_node.total_cost, 0, start_node)] # 0 is the counter/tie-breaker
+    visited = set()
+    counter = 1 # counter for tie-breaking in heap check
+    nodes_expanded = 0
+    max_nodes_in_memory = 1
+
+    while priority_queue:
+        _, _, current_node = heapq.heappop(priority_queue) 
+        if current_node.coord in visited:
+            continue
+        nodes_expanded += 1
+        
+        visited.add(current_node.coord)
+        r, c = current_node.coord
+        if (r,c) == goal:
+            return current_node, nodes_expanded, max_nodes_in_memory
+        directions = [(r-1 ,c), (r + 1, c), (r, c + 1), (r, c - 1)]
+        for dr, dc in directions:
+            if 0 <= dr < rows and 0 <= dc < cols and map_grid[dr][dc] != 0 and (dr,dc) not in visited:
+                total_distance = current_node.cost + map_grid[dr][dc]
+                new_heuristic = manhanttan_distance((dr,dc), goal)
+                new_node = Node((dr,dc), total_distance, current_node)
+                new_node.heuristic = new_heuristic
+                new_node.total_cost = total_distance + new_heuristic
+                heapq.heappush(priority_queue, (new_node.total_cost, counter, new_node)) # use the counter as a tie-breaker
+                counter += 1 # increment the counter
+            current_nodes_in_memory = len(priority_queue) + len(visited)
+            if current_nodes_in_memory > max_nodes_in_memory:
+                max_nodes_in_memory = current_nodes_in_memory
+    return None,nodes_expanded,max_nodes_in_memory
+
+
+
+    
 
 def bfs(dimensions, start, goal, map_grid):
     startTime = time.time()
@@ -48,8 +95,8 @@ def bfs(dimensions, start, goal, map_grid):
     nodes_expanded = 0
 
     while queue:
-        elapsedTime = time.time() - startTime
-        if elapsedTime > timer:  # 180 seconds = 3 minutes
+        elapsed_time = time.time() - startTime
+        if elapsed_time > timer:  # 180 seconds = 3 minutes
             print("3-minute time cutoff reached!")
             return None, nodes_expanded, max_nodes
         max_nodes = max(max_nodes, len(queue))
@@ -81,8 +128,8 @@ def dfs(dimensions, start, goal, map_grid,depth):
     nodes_expanded = 0
 
     while stack:
-        elapsedTime = time.time() - startTime
-        if elapsedTime > timer:  # 180 seconds = 3 minutes
+        elapsed_time = time.time() - startTime
+        if elapsed_time > timer:  # 180 seconds = 3 minutes
             print("3-minute time cutoff reached!")
             return None, nodes_expanded, max_nodes
         
@@ -111,6 +158,7 @@ def dfs(dimensions, start, goal, map_grid,depth):
 
     return None, nodes_expanded, max_nodes        
 
+#function to read which test case to use
 def file_reader():
     try:
         file_name = input("Enter the file name you wish to test: ")
@@ -124,12 +172,11 @@ def file_reader():
         print(f"Error reading the file: {e}")
         return None, None, None, None
 
-
+# function that calls search algos depending on user input
 def searchDecision(searchChoice, dimensions, start, goal, map_grid):
     if searchChoice == "bfs":
         start_time = time.time()
         end_node, nodes_expanded, max_nodes = bfs(dimensions, start, goal, map_grid)
-        end_time = time.time()
     elif searchChoice == "ids":
         depth = 0
         start_time = time.time()
@@ -146,10 +193,9 @@ def searchDecision(searchChoice, dimensions, start, goal, map_grid):
                 end_node, nodes_expanded, max_nodes = dfs(dimensions, start, goal, map_grid, depth)
             else:
                 break
-
-        end_time = time.time()
     elif searchChoice == "a*":
-        return
+        start_time = time.time()
+        end_node, nodes_expanded, max_nodes = a_star(dimensions, start, goal, map_grid)
     else:
         print("Search has not been implemented")
         return
@@ -166,8 +212,8 @@ def main():
     if not dimensions or not start or not goal or not map_grid:
         print("File not in correct format")
         return
-    searchChoice = input("Enter search algorithm (bfs, ids, a*):")
-    searchDecision(searchChoice, dimensions, start, goal, map_grid)
+    search_choice = input("Enter search algorithm (bfs, ids, a*):")
+    searchDecision(search_choice, dimensions, start, goal, map_grid)
     
 
 if __name__ == "__main__":
